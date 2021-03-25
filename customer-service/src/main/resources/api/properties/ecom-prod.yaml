@@ -1,0 +1,5 @@
+db:
+  host: "mysql-22925-0.cloudclusters.net"
+  port: "22925"
+  user: "gsharma"
+  password: "Java@1234"

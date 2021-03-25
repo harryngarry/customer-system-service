@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="13e1f96b-dd5a-42e7-8228-976147e8aa2d" basePath="/api">
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="b6d9b251-a81a-4fbd-80aa-4eb09851f59f" >
+		<db:my-sql-connection host="${db.host}" port="${db.port}" user="${db.user}" password="${db.password}" database="cars" />
+	</db:config>
+	<global-property doc:name="Global Property" doc:id="7ac76290-6595-4f3a-ba30-731bd9a881a3" name="ecom-env" value="prod" />
+	<configuration-properties doc:name="Configuration properties" doc:id="9269b5ce-49a3-4104-bd3f-42125a88850e" file="api\properties\ecom-${ecom-env}.yaml" />
+	<flow name="customer-app-apiFlow" doc:id="428c350d-708c-4a5b-80ee-64434179e969" >
+		<http:listener doc:name="Listener" doc:id="fd7c59fd-f7e5-43e7-ab79-d6c6deb639bc" config-ref="HTTP_Listener_config" path="/customerservice/getAllCustomers"/>
+		<logger level="INFO" doc:name="Logger" doc:id="0d2115cf-930e-4667-a2f9-77ff07d38dfd" message="#['system level api call']"/>
+		<db:select doc:name="Select" doc:id="5c69e9ff-3a24-4865-87a9-29280e175f49" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from customers;]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="57b14441-91f6-4ab7-89b6-680a3511de41">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
